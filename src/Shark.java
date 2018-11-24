@@ -10,11 +10,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Random;
 
-//Creating the Shark class and implementing the ActionListener
-public class Shark implements ActionListener {
+//Creating the Shark class and implementing the ActionListener and MouseListener
+public class Shark implements ActionListener, MouseListener {
     //Main method
     public static void main(String args[]) {
 
@@ -28,6 +31,16 @@ public class Shark implements ActionListener {
     public final int WIDTH = 800, HEIGHT = 800;
 
     public Data data;
+
+    //declaring boolean for when the game is started
+    public boolean gameStart;
+    //declaring boolean for when the game is lost
+    public boolean gameEnd;
+
+    //gameticks variable
+    public int gameTick;
+    //motion of the shark
+    public int yMotion;
 
     //Creating a rectangle from awt import called sharkMain
     public Rectangle sharkMain;
@@ -54,6 +67,9 @@ public class Shark implements ActionListener {
         /*Setting the title of our game.
         This will appear on the top left of the application window*/
         frame.setTitle("Deep Sea Shark Game");
+        //Centering the application window
+        frame.pack();
+        frame.setLocationRelativeTo(null);
         //Jframe will exit when we hit the close button
         frame.setDefaultCloseOperation(frame.EXIT_ON_CLOSE);
         //JFrame size is set to our constant int's which are declared above.
@@ -83,6 +99,76 @@ public class Shark implements ActionListener {
     //Creating the actionPerformed method
     @Override
     public void actionPerformed(ActionEvent e) {
+
+        /*Declaring speed variable to determine how fast the obstacles approach
+        If the game is too easy I can increase speed or if the game is too hard i can
+        decrease the speed. */
+        int speed = 10;
+        gameTick++;
+
+        if (gameStart) {
+
+            //Keep loopoing until "i" gets to the same value as obstacles.size()
+            for (int i = 0; i < obstacles.size(); i++) {
+                Rectangle obstacle = obstacles.get(i);
+                obstacle.x -= speed;
+            }
+
+            //If the remainder of ticks is = 0 and yMotion is less than 15 execute the statement
+            if (gameTick % 2 == 0 && yMotion < 15) {
+                yMotion += 2;
+            }
+
+            //
+            for (int i = 0; i < obstacles.size(); i++) {
+                Rectangle obstacle = obstacles.get(i);
+
+                if (obstacle.x + obstacle.width < 0) {
+                    obstacles.remove(obstacle);
+
+                /*If its the top obstacle (y == 0) then add another obstacle
+                /* Without this if statement the game will only provide
+                a few obstacles. By using this if statement our game
+                should provide obstacles infinitely
+                 */
+                    if (obstacle.y == 0) {
+                        addObstacle(false);
+                    }
+                }
+            }
+
+
+            sharkMain.y += yMotion;
+
+            //Checking for collision with obstacle
+            for (Rectangle obstacle : obstacles) {
+                if (obstacle.intersects(sharkMain)) {
+                    gameEnd = true;
+
+                    /*This will keep the shark from moving through obstacles
+                    when the game is over.
+                     */
+                    sharkMain.x = obstacle.x - sharkMain.width;
+                }
+            }
+
+            if (sharkMain.y > HEIGHT - 120 || sharkMain.y < 0) {
+                gameEnd = true;
+            }
+
+            /*This if statement will execute when gameEnd is true.
+            This will keep our shark on the screen just above
+            the ground level.
+
+            Without this code our shark falls through the world
+            and dissapears at the end.
+            */
+            if (gameEnd)
+            {
+                sharkMain.y = HEIGHT - 120 - sharkMain.height;
+            }
+
+        }
         data.repaint();
     }
 
@@ -107,6 +193,30 @@ public class Shark implements ActionListener {
         graphic.setColor(Color.green.darker());
         //Adding the seaweed to just above the ground floor
         graphic.fillRect(0, HEIGHT - 120, WIDTH, 10);
+
+        //for each loop to paint obstacles
+        for(Rectangle obstacle : obstacles)
+        {
+            paintObstacle(graphic, obstacle);
+        }
+
+        //Setting the properties for our game over output
+        graphic.setColor(Color.red);
+        graphic.setFont(new Font("Arial", 1, 100));
+
+
+        if (!gameEnd)
+        {
+            graphic.drawString("Click to begin!", 50,  HEIGHT / 2 - 50);
+        }
+
+        /*If the boolean gameEnd is true then use the draw string method
+        to output "Game Over" on the screen
+         */
+        if (gameEnd)
+        {
+            graphic.drawString("Game Over!!!", 100,  HEIGHT / 2 - 50);
+        }
     }
 
     //A method for designing our obstacle
@@ -147,4 +257,29 @@ public class Shark implements ActionListener {
         }
     }
 
+    //MouseListener methods
+    @Override
+    public void mouseClicked(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
+    }
 }
