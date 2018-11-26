@@ -42,6 +42,9 @@ public class Shark implements ActionListener, MouseListener {
     //motion of the shark
     public int yMotion;
 
+    //score variable
+    public int score;
+
     //Creating a rectangle from awt import called sharkMain
     public Rectangle sharkMain;
 
@@ -76,12 +79,14 @@ public class Shark implements ActionListener, MouseListener {
         frame.setSize(WIDTH, HEIGHT);
         //We do not want the JFrame to be resisable so its set to false
         frame.setResizable(false);
+        //adding mouse listener
+        frame.addMouseListener(this);
 
         //Making the JFrame visible
         frame.setVisible(true);
 
         //sharkMain is made a rectangle and given values
-        sharkMain = new Rectangle(WIDTH / 2 - 10, HEIGHT / 2 - 10, 40, 20);
+        sharkMain = new Rectangle(WIDTH / 2 - 10, HEIGHT / 2 - 10, 20, 20);
         //obstacles is made an ArrayList of type Rectangle
         obstacles = new ArrayList<Rectangle>();
 
@@ -205,7 +210,7 @@ public class Shark implements ActionListener, MouseListener {
         graphic.setFont(new Font("Arial", 1, 100));
 
 
-        if (!gameEnd)
+        if (!gameStart)
         {
             graphic.drawString("Click to begin!", 50,  HEIGHT / 2 - 50);
         }
@@ -216,6 +221,11 @@ public class Shark implements ActionListener, MouseListener {
         if (gameEnd)
         {
             graphic.drawString("Game Over!!!", 100,  HEIGHT / 2 - 50);
+        }
+
+        if (!gameEnd && gameStart)
+        {
+            graphic.drawString(String.valueOf(score), WIDTH / 2 - 25, 100);
         }
     }
 
@@ -257,10 +267,42 @@ public class Shark implements ActionListener, MouseListener {
         }
     }
 
+    public void jump()
+    {
+        if (gameEnd)
+        {
+            sharkMain = new Rectangle(WIDTH / 2 - 10, HEIGHT / 2 - 10, 20, 20);
+            obstacles.clear();
+            yMotion = 0;
+            score = 0;
+
+            addObstacle(true);
+            addObstacle(true);
+            addObstacle(true);
+            addObstacle(true);
+
+            gameEnd = false;
+        }
+
+        if (!gameStart)
+        {
+            gameStart = true;
+        }
+        else if (!gameEnd)
+        {
+            if (yMotion > 0)
+            {
+                yMotion = 0;
+            }
+
+            yMotion -= 10;
+        }
+    }
+
     //MouseListener methods
     @Override
     public void mouseClicked(MouseEvent e) {
-
+        jump();
     }
 
     @Override
